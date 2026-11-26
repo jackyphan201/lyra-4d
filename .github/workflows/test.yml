@@ -5,9 +5,10 @@ permissions:
 jobs:
   unit:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        python: ["3.9", "3.12"]
+        python: ["3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -19,3 +20,13 @@ jobs:
       - name: Unit tests (offline, fake upstreams)
         working-directory: tests
         run: python -m unittest -v
+  macos-system-python:
+    # the Python that ships with macOS (3.9 on current images), as most users run the installer with it
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: /usr/bin/python3 --version
+      - run: /usr/bin/python3 tools/build.py --check
+      - name: Unit tests
+        working-directory: tests
+        run: /usr/bin/python3 -m unittest -v
