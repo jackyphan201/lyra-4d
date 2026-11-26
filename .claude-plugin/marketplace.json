@@ -1,0 +1,14 @@
+{
+  "name": "lyra-4d",
+  "owner": {
+    "name": "Lyra 4-D"
+  },
+  "description": "Lyra 4-D intake layer for Claude Code. Use installer/lyra4d.py to also add the pinned upstream skills.",
+  "plugins": [
+    {
+      "name": "lyra-4d",
+      "source": "./adapters/claude/lyra-4d",
+      "description": "Lyra 4-D intake layer (hooks + lyra skill)"
+    }
+  ]
+}

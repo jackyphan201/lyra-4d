@@ -1,0 +1,25 @@
+{
+  "_doc": "Live acceptance cases (README section 'Kiểm thử'). Each case runs in a fresh copy of its fixture. Multi-turn cases resume the same session.",
+  "cases": [
+    {"id": "1-translate", "fixture": "empty", "turns": [
+      "Dịch đoạn này sang tiếng Anh, giữ ba bullet:\n- Học viên cần nộp bài trước thứ Sáu.\n- Giáo viên sẽ phản hồi trong vòng 48 giờ.\n- Điểm cuối kỳ gồm bài tập và thi nói."]},
+    {"id": "2-po-tool-no-docs", "fixture": "empty", "turns": [
+      "Tôi muốn xây một công cụ giúp PO chọn việc nên ưu tiên trong tuần"]},
+    {"id": "3-po-tool-with-docs", "fixture": "po-docs", "turns": [
+      "Tôi muốn xây một công cụ giúp PO chọn việc nên ưu tiên trong tuần"]},
+    {"id": "4-grill", "fixture": "empty", "turns": [
+      "Hãy phỏng vấn tôi thật kỹ về ý tưởng này: một ứng dụng nhắc học viên ôn từ vựng mỗi ngày.",
+      "Người dùng là người lớn đi làm, chỉ học được 10 phút buổi tối trên điện thoại. Mục tiêu là giữ được chuỗi ôn tập 30 ngày. Các câu còn lại tôi theo đề xuất của bạn."]},
+    {"id": "5a-research-report", "fixture": "empty", "turns": [
+      "Tôi cần một báo cáo nghiên cứu có trích nguồn: so sánh các thư viện Python trích xuất bảng từ PDF theo độ chính xác, giấy phép và mức độ bảo trì."]},
+    {"id": "5b-quick-lookup", "fixture": "empty", "turns": [
+      "Cổng mặc định của PostgreSQL là gì?"]},
+    {"id": "6-choose-b-draft", "fixture": "empty", "turns": [
+      "Viết email thông báo lịch nghỉ Tết cho phụ huynh. Trước hết cho tôi 2 hướng giọng văn: A trang trọng, B thân mật, mỗi hướng một câu mở đầu mẫu.",
+      "Chọn B, chỉ làm bản nháp."]},
+    {"id": "7-approved-spec-plan", "fixture": "approved-spec", "turns": [
+      "Spec trong docs/specs đã được duyệt. Hãy lập kế hoạch triển khai phần mềm cho nó."]},
+    {"id": "8-project-rules-missing-skill", "fixture": "project-rules", "disable_skill": "brainstorming", "turns": [
+      "Brainstorm giúp tôi 3 phương án tên cho chương trình học hè năm nay. lyra diag"]}
+  ]
+}

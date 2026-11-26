@@ -1,0 +1,81 @@
+{
+  "_doc": "Curated routing hints for every skill in upstream.lock.json. tools/build.py renders skills/lyra/SKILL-MAP.md from this file and fails if a locked skill is missing here. effects: none | files | subagents | git | tracker | browser | installs | code.",
+  "groups": [
+    {"job": "Clarify what the user wants", "skills": [
+      {"name": "grilling", "repo": "mattpocock", "hint": "Interview in rounds to stress-test a plan, decision or idea; each round builds on the last answers.", "effects": ["subagents (read-only fact lookups)"]},
+      {"name": "grill-me", "repo": "mattpocock", "hint": "User-only wrapper: calls grilling. Route to grilling instead.", "effects": ["none"]},
+      {"name": "grill-with-docs", "repo": "mattpocock", "hint": "User-only wrapper: calls grilling and domain-modeling. Route to those two instead.", "effects": ["files"]},
+      {"name": "domain-modeling", "repo": "mattpocock", "hint": "Challenge terms against GLOSSARY.md, code and ADRs; record resolved terms and ADRs.", "effects": ["files (GLOSSARY.md, docs/adr)"]},
+      {"name": "brainstorming", "repo": "superpowers", "hint": "Find out what to build and why, lay out approaches, write and get approval for a design doc. Skip when the request is already clear.", "effects": ["files (design doc, committed)", "git", "subagents (builder check)", "browser (optional visual companion)"]},
+      {"name": "to-questionnaire", "repo": "mattpocock", "hint": "User-only: turn a decision you cannot answer into a questionnaire for someone else.", "effects": ["files"]},
+      {"name": "wait-what", "repo": "mattpocock", "hint": "User-only: re-pitch a message that did not land.", "effects": ["none"]}
+    ]},
+    {"job": "Research and learning", "skills": [
+      {"name": "research", "repo": "mattpocock", "hint": "Investigate against primary sources; write a cited Markdown report. Quick lookups stay in chat.", "effects": ["subagents (background)", "files"]},
+      {"name": "teach", "repo": "mattpocock", "hint": "User-only: teach a concept through a workspace of lessons and references.", "effects": ["files (HTML lessons)", "browser"]}
+    ]},
+    {"job": "Spec, plan and tickets", "skills": [
+      {"name": "writing-plans", "repo": "superpowers", "hint": "From an approved spec or requirements, write a task-by-task implementation plan. Use directly when a spec is approved.", "effects": ["files (docs/superpowers/plans)", "git"]},
+      {"name": "to-spec", "repo": "mattpocock", "hint": "User-only: synthesize the conversation into a spec and publish it to the issue tracker.", "effects": ["tracker"]},
+      {"name": "to-tickets", "repo": "mattpocock", "hint": "User-only: split a plan or spec into tracer-bullet tickets with blocking edges.", "effects": ["tracker", "files"]},
+      {"name": "wayfinder", "repo": "mattpocock", "hint": "User-only: chart a huge, foggy effort as decision tickets and resolve them one at a time.", "effects": ["tracker", "subagents"]},
+      {"name": "triage", "repo": "mattpocock", "hint": "User-only: move incoming issues and PRs through triage roles.", "effects": ["tracker"]},
+      {"name": "setup-matt-pocock-skills", "repo": "mattpocock", "hint": "User-only: one-time repo setup (tracker, labels, doc layout) for Matt's engineering skills.", "effects": ["files", "tracker"]}
+    ]},
+    {"job": "Build", "skills": [
+      {"name": "executing-plans", "repo": "superpowers", "hint": "Execute a written plan inline, task by task.", "effects": ["code", "git"]},
+      {"name": "subagent-driven-development", "repo": "superpowers", "hint": "Execute a plan with implementer and reviewer subagents.", "effects": ["subagents", "code", "git"]},
+      {"name": "dispatching-parallel-agents", "repo": "superpowers", "hint": "Two or more independent tasks with no shared state.", "effects": ["subagents"]},
+      {"name": "implement", "repo": "mattpocock", "hint": "User-only: implement one spec or ticket (drives tdd and code-review).", "effects": ["code", "git", "tracker"]},
+      {"name": "implement-spec", "repo": "mattpocock", "hint": "User-only: implement a whole spec and its tickets with parallel subagents on one branch.", "effects": ["subagents", "code", "git", "tracker"]},
+      {"name": "test-driven-development", "repo": "superpowers", "hint": "Test-first for any feature or bugfix; the superpowers flow's TDD.", "effects": ["code"]},
+      {"name": "tdd", "repo": "mattpocock", "hint": "Test-first in vertical red-green slices; Matt's flow's TDD. Pick one TDD skill, not both.", "effects": ["code"]},
+      {"name": "prototype", "repo": "mattpocock", "hint": "Throwaway prototype (logic HTML or UI) to answer a design question.", "effects": ["code", "git (throwaway branch)", "installs"]},
+      {"name": "wizard", "repo": "mattpocock", "hint": "Generate a bash wizard for steps only a human can do (dashboards, secrets).", "effects": ["files"]},
+      {"name": "using-git-worktrees", "repo": "superpowers", "hint": "Create an isolated workspace before feature work or plan execution.", "effects": ["git", "installs"]},
+      {"name": "codebase-design", "repo": "mattpocock", "hint": "Vocabulary and method for designing deep module interfaces and seams.", "effects": ["subagents (design it twice)"]},
+      {"name": "improve-codebase-architecture", "repo": "mattpocock", "hint": "User-only: scan for deepening opportunities, HTML report, then grill one.", "effects": ["subagents", "files"]}
+    ]},
+    {"job": "Debug", "skills": [
+      {"name": "systematic-debugging", "repo": "superpowers", "hint": "Any bug, test failure or unexpected behaviour, before proposing fixes.", "effects": ["code"]},
+      {"name": "diagnosing-bugs", "repo": "mattpocock", "hint": "Hard bugs and performance regressions: build a tight pass/fail loop first.", "effects": ["code", "git", "browser"]},
+      {"name": "diagnosing-superpowers", "repo": "superpowers", "hint": "Why a superpowers session went wrong (repeats, cost, skipped skills).", "effects": ["subagents"]}
+    ]},
+    {"job": "Review and finish", "skills": [
+      {"name": "code-review", "repo": "mattpocock", "hint": "Review changes since a fixed point on Standards and Spec, two parallel subagents.", "effects": ["subagents", "git (read)"]},
+      {"name": "requesting-code-review", "repo": "superpowers", "hint": "Ask a reviewer subagent to check finished work before merging.", "effects": ["subagents", "git (read)"]},
+      {"name": "receiving-code-review", "repo": "superpowers", "hint": "Handle review feedback with technical rigor before changing code.", "effects": ["none"]},
+      {"name": "verification-before-completion", "repo": "superpowers", "hint": "Run the checks before claiming work is done, fixed or passing.", "effects": ["code (runs checks)"]},
+      {"name": "finishing-a-development-branch", "repo": "superpowers", "hint": "Decide how to integrate finished work: merge, PR, clean up.", "effects": ["git"]},
+      {"name": "pr", "repo": "mattpocock", "hint": "Write a PR body: smallest visual, evidence, door call.", "effects": ["none"]},
+      {"name": "retro", "repo": "mattpocock", "hint": "User-only: look back on a session and improve the agent's environment.", "effects": ["files"]}
+    ]},
+    {"job": "Session and writing for agents", "skills": [
+      {"name": "handoff", "repo": "mattpocock", "hint": "User-only: compact the conversation into a handoff doc in the OS temp dir.", "effects": ["files (temp dir)"]},
+      {"name": "writing-for-agents", "repo": "mattpocock", "hint": "Write or edit skills, AGENTS.md, CLAUDE.md.", "effects": ["files"]},
+      {"name": "writing-skills", "repo": "superpowers", "hint": "Create, edit and test skills before deployment.", "effects": ["files", "subagents", "git"]},
+      {"name": "ask-matt", "repo": "mattpocock", "hint": "User-only router over Matt's skills. Lyra already routes; mention it when the user wants Matt's own map.", "effects": ["none"]},
+      {"name": "using-superpowers", "repo": "superpowers", "hint": "Superpowers bootstrap. Not exposed by default: Lyra's intake replaces its start-up rule.", "effects": ["none"]}
+    ]},
+    {"job": "Opt-in extras (installed with --matt-extra)", "skills": [
+      {"name": "chief-of-staff", "repo": "mattpocock", "hint": "User-only, in progress: delegate to fresh subagents and keep a dated wiki.", "effects": ["subagents", "files", "git"]},
+      {"name": "claude-handoff", "repo": "mattpocock", "hint": "User-only, in progress: hand the conversation to a fresh background agent.", "effects": ["subagents"]},
+      {"name": "loop-me", "repo": "mattpocock", "hint": "User-only, in progress: grill the user about specs for workflows.", "effects": ["none"]},
+      {"name": "setup-ts-deep-modules", "repo": "mattpocock", "hint": "User-only, in progress: dependency-cruiser deep modules for a TS repo.", "effects": ["files", "installs"]},
+      {"name": "writing-beats", "repo": "mattpocock", "hint": "User-only, in progress: assemble raw material into beats.", "effects": ["files"]},
+      {"name": "writing-fragments", "repo": "mattpocock", "hint": "User-only, in progress: mine raw writing fragments.", "effects": ["files"]},
+      {"name": "writing-shape", "repo": "mattpocock", "hint": "User-only, in progress: shape raw material into an article.", "effects": ["files"]},
+      {"name": "git-guardrails-claude-code", "repo": "mattpocock", "hint": "Frozen misc: Claude Code hooks that block dangerous git commands.", "effects": ["files (Claude settings)", "installs"]},
+      {"name": "migrate-to-shoehorn", "repo": "mattpocock", "hint": "Frozen misc: replace `as` in tests with shoehorn.", "effects": ["code", "installs"]},
+      {"name": "scaffold-exercises", "repo": "mattpocock", "hint": "Frozen misc: scaffold course exercise folders.", "effects": ["files"]},
+      {"name": "setup-pre-commit", "repo": "mattpocock", "hint": "Frozen misc: Husky + lint-staged pre-commit hooks.", "effects": ["files", "installs"]}
+    ]}
+  ],
+  "overlaps": [
+    "Interview: grilling stress-tests a plan the user already has; brainstorming discovers what to build. Pick one per need.",
+    "TDD: test-driven-development in the superpowers flow, tdd in Matt's flow. One per task.",
+    "Debugging: systematic-debugging for any bug; diagnosing-bugs when a bug resists and needs a feedback loop.",
+    "Review: code-review reviews a branch against standards and spec; requesting-code-review asks for a review of your own finished work.",
+    "Plans: writing-plans writes a plan file; to-spec and to-tickets publish to an issue tracker (user-only)."
+  ]
+}
