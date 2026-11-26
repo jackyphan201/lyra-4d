@@ -4,11 +4,13 @@
 
 | Hạng mục | Cách kiểm | Trạng thái |
 |---|---|---|
-| Unit test offline (25 test) | `cd tests && python3 -m unittest`, với upstream giả trong HOME tạm | **Đã chạy: đạt 25/25** |
+| Unit test offline (25 test) | `cd tests && python3 -m unittest`, với upstream giả trong HOME tạm; GitHub Actions trên Ubuntu và macOS × Python 3.12/3.13, cùng Python hệ thống của macOS | **Đã chạy: đạt 25/25, CI 5/5 job xanh** |
 | Claude Code CLI 2.1.331, model `claude-opus-5-5` | `tests/live/run_live.py --host claude`, chế độ `-p`, chỉ cho phép Read/Glob/Grep/Skill (ghi file bị từ chối và được ghi nhận) | **Đã chạy thật** |
 | Codex CLI 0.171.0-alpha.13.2, model mặc định của tài khoản | `tests/live/run_live.py --host codex`, sandbox `read-only` | **Đã chạy thật** (2 lượt toàn bộ, ca 2 và 3 thêm lượt thứ 3). Hook của Lyra **chưa được trust**, nên lõi chỉ đến qua AGENTS.md |
 | Gemini CLI | Cài vào HOME tạm, kiểm tra `settings.json`, `GEMINI.md`, hook `BeforeAgent`, idempotency và gỡ cài đặt | **Chỉ xác minh cấu hình.** Máy thử chưa cài Gemini CLI |
-| Tab Code của Claude desktop | Plugin được nạp khi chạy bằng binary của app với môi trường của app (danh sách plugin trong sự kiện `init`) | Xác minh qua cấu hình. Chưa thử trong một phiên desktop tương tác mới |
+| Tab Code của Claude desktop | Một phiên tương tác đang mở từ trước khi cài: hook log ghi lượt 1 nhận lõi qua cơ chế dự phòng (4.256 ký tự), lượt 2 và 3 chỉ nhận ghi chú (222 ký tự); ghi chú Lyra xuất hiện trong context của phiên | **Đã chạy thật** (hook và cơ chế dự phòng). Chưa chạy lại 9 ca trong desktop |
+| Cài "chỉ Lyra" từ GitHub cho Claude Code | `claude plugin marketplace add jackyphan201/lyra-4d` rồi `plugin install lyra-4d@lyra-4d`, trong thư mục cấu hình Claude tạm | **Đã chạy thật**: plugin cài được, có đủ 3 hook và skill `lyra` |
+| Cài từ repo công khai | Clone mới từ GitHub, `build.py --check`, unittest, `install --hosts codex,gemini` vào HOME tạm (tải upstream thật, kiểm 411 file), `verify` | **Đã chạy thật**: đạt |
 | ChatGPT / Claude / Gemini Projects | Không có API tự động hoá | **Chưa kiểm tra được.** Có file và hướng dẫn để kiểm tra tay |
 
 **Phương pháp chấm.** Mỗi ca chạy một lần (n=1) trên mỗi host, trong một bản sao mới của fixture. Kết quả được chấm bằng cách đọc transcript và so với tiêu chí nghiệm thu; không dùng model thứ hai để chấm. Bằng chứng host:
