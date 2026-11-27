@@ -46,6 +46,14 @@ def skill_map() -> str:
     missing = sorted(set(locked) - seen)
     if missing:
         raise SystemExit(f"catalog.json is missing locked skills: {missing}")
+    host = cat.get("host_kits") or {}
+    locked_names = {n for (_, n) in locked}
+    for kit in host.get("kits") or []:
+        for sk in kit.get("skills") or []:
+            if sk["name"] in locked_names:
+                raise SystemExit(f"host kit {kit.get('name')} reuses the locked skill name {sk['name']}")
+    if host:
+        lines += lyra4d.render_host_kits(host)
     lines.append("## Overlaps")
     lines += [f"- {o}" for o in cat["overlaps"]]
     lines.append("")
@@ -55,12 +63,12 @@ def skill_map() -> str:
 def claude_plugin_files() -> dict:
     cmd = 'python3 "${CLAUDE_PLUGIN_ROOT}/hooks/lyra_hook.py" --host claude --event '
     hooks = {
-        "description": "Lyra 4-D: core once per session, a short intake note every turn, a log line when a skill runs.",
+        "description": "Lyra 4-D: core once per session, a short intake note every turn, a log line when a skill or MCP tool runs.",
         "hooks": {
             "SessionStart": [{"matcher": "startup|resume|clear|compact",
                               "hooks": [{"type": "command", "command": cmd + "session-start", "timeout": 10}]}],
             "UserPromptSubmit": [{"hooks": [{"type": "command", "command": cmd + "prompt", "timeout": 10}]}],
-            "PostToolUse": [{"matcher": "Skill", "hooks": [{"type": "command", "command": cmd + "post-tool", "timeout": 10}]}],
+            "PostToolUse": [{"matcher": "^Skill$|^mcp__", "hooks": [{"type": "command", "command": cmd + "post-tool", "timeout": 10}]}],
         },
     }
     manifest = {

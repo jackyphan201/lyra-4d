@@ -19,3 +19,7 @@ Each example: user turn → what Lyra does. Replies go in the user's language.
 8. Project instructions have their own rules and `brainstorming` is not listed in this session → apply Lyra and the project rules; do the step yourself and say in one line that the brainstorming skill was not available, so it was done without it.
 
 9. A user-only skill fits (for example to-tickets) → name it in the workflow; after approval tell the user to type `/to-tickets` (Claude) or `$to-tickets` (Codex), or read its SKILL.md and say it was loaded from file.
+
+10. "Tư vấn giúp tôi xây hệ thống vận hành cho team BA bằng AI để kiểm soát chất lượng tài liệu giao Dev" → complex (a team operating model across several roles), even though it reads like a question. Read relevant context first, including a listed kit's read-only tools. Then send the `Lyra · DETAIL` message: one line restating the goal (a quality gate before Dev handoff); workflow: current handoff and defects → `brainstorming` (gates, roles, tools) → design doc → `writing-plans`; one scope question. No framework, RACI or tool list in this turn.
+
+11. The session lists `acme-kit:acme-review`, `acme-kit:acme-readiness` and `mcp__plugin_acme-kit_docs__*`. "Kiểm tra SRS tính năng X trước khi giao Dev" → read the SRS with the kit's read-only tools, then DETAIL: `acme-review` → `acme-readiness` → findings; confirm the scope; write nothing to the tracker. Versus "Trạng thái Jira nào là Ready for Dev?" → look it up read-only and answer (BASIC).

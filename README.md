@@ -4,7 +4,7 @@ Lyra 4-D là lớp tiếp nhận (intake) chạy **trước khi agent chọn ski
 
 - **Làm ngay** nếu yêu cầu đơn giản và đã rõ (BASIC).
 - **Hỏi một câu** nếu yêu cầu ngắn nhưng có nhiều cách hiểu.
-- **Đề xuất workflow ngắn rồi chờ xác nhận** nếu yêu cầu phức tạp (DETAIL).
+- **Đề xuất workflow ngắn rồi chờ xác nhận** nếu yêu cầu phức tạp (DETAIL), kể cả khi yêu cầu nghe như một câu hỏi tư vấn: xây hoặc thay đổi một hệ thống, quy trình, đội ngũ; nhiều vai trò, giai đoạn hoặc đầu ra; làm trọn gói. Tin nhắn DETAIL mở đầu bằng dòng `Lyra · DETAIL` để bạn kiểm tra được.
 - **Chạy tiếp các bước** nếu bạn đã duyệt workflow.
 
 Lyra điều phối toàn bộ skill của [mattpocock/skills](https://github.com/mattpocock/skills) và [obra/superpowers](https://github.com/obra/superpowers). Bộ cài lấy các skill này từ repo gốc ở commit được ghim, kiểm tra hash và giữ nguyên từng file.
@@ -13,11 +13,11 @@ Lyra điều phối toàn bộ skill của [mattpocock/skills](https://github.co
 prompt ──► Lyra 4-D (Deconstruct → Diagnose → Develop → Deliver)
              ├─ BASIC: trả kết quả ngay
              ├─ mơ hồ: 1 câu hỏi có sức phân biệt nhất
-             ├─ DETAIL: "Tôi hiểu bạn muốn… / Workflow đề xuất… / Cần bạn xác nhận…"
+             ├─ DETAIL: "Lyra · DETAIL / Tôi hiểu bạn muốn… / Workflow đề xuất… / Cần bạn xác nhận…"
              └─ đã duyệt: gọi 0, 1 hoặc nhiều skill theo thứ tự đã chốt
 ```
 
-- Nguồn chính thức của Lyra: [`core/LYRA-CORE.md`](core/LYRA-CORE.md), khoảng 4.000 ký tự. Phần chỉ đọc khi cần nằm trong [`skills/lyra/`](skills/lyra/SKILL.md).
+- Nguồn chính thức của Lyra: [`core/LYRA-CORE.md`](core/LYRA-CORE.md), khoảng 4.700 ký tự. Phần chỉ đọc khi cần nằm trong [`skills/lyra/`](skills/lyra/SKILL.md).
 - Mọi adapter được sinh từ hai nguồn trên bằng `python3 tools/build.py`.
 - Kết quả kiểm thử: [`docs/RESULTS.md`](docs/RESULTS.md). Thiết kế: [`docs/DESIGN.md`](docs/DESIGN.md).
 
@@ -48,7 +48,7 @@ Bộ cài thực hiện các việc sau:
 
 | Host | Cơ chế | Lyra nhận mọi lượt? | Gọi skill local? | Trạng thái kiểm chứng |
 |---|---|---|---|---|
-| **Claude Code** (CLI, app desktop tab Code) | Plugin `lyra-4d`: hook `SessionStart` (lõi, mỗi phiên) + `UserPromptSubmit` (ghi chú ngắn, mỗi lượt) + `PostToolUse:Skill` (ghi log) | **Có, bằng hook thật** | Có: 27 skill Matt + 14 skill superpowers (plugin cục bộ) | Chạy thật, xem RESULTS |
+| **Claude Code** (CLI, app desktop tab Code) | Plugin `lyra-4d`: hook `SessionStart` (lõi, mỗi phiên) + `UserPromptSubmit` (ghi chú ngắn, mỗi lượt) + `PostToolUse` cho `Skill` và tool MCP (ghi log, chỉ tên) | **Có, bằng hook thật** | Có: 27 skill Matt + 14 skill superpowers (plugin cục bộ) | Chạy thật, xem RESULTS |
 | **Codex** (CLI, app) | Khối Lyra ở đầu `~/.codex/AGENTS.md` (lõi, luôn nạp) + hook `UserPromptSubmit` trong `~/.codex/hooks.json` | Lõi: có (AGENTS.md). Hook: chỉ chạy sau khi bạn **trust** | Có: 41 skill + `lyra` trong `~/.agents/skills` | Chạy thật, xem RESULTS |
 | **Gemini CLI** | Khối Lyra ở đầu `~/.gemini/GEMINI.md` + hook `BeforeAgent` và `AfterTool:activate_skill` trong `~/.gemini/settings.json` | Có (hook thật, theo tài liệu) | Có: dùng chung `~/.agents/skills` | **Chỉ xác minh cấu hình** (máy thử chưa cài Gemini CLI) |
 | **ChatGPT Projects** | Đoạn dán vào Project instructions + file `LYRA-PROJECT.md` | Theo instructions, không có hook | Không. Chỉ skill do ChatGPT hỗ trợ tải lên (tuỳ gói) | Chưa thể kiểm tra tự động |
@@ -94,11 +94,11 @@ Ba nhóm khác nhau về bản chất:
   - Rồi chạy `claude plugin marketplace add` và `claude plugin install` cho ba plugin: `lyra-4d`, `mattpocock-skills` (27 skill) và `superpowers` (14 skill).
   - Không thấy CLI `claude` thì bộ cài in sẵn các lệnh `/plugin …` để bạn dán vào Claude Code.
 - Chỉ muốn Lyra, không cần upstream: trong Claude Code chạy `/plugin marketplace add jackyphan201/lyra-4d` rồi `/plugin install lyra-4d@lyra-4d`.
-- Kích hoạt không cần gọi tên: plugin có hook `SessionStart` (nạp lõi một lần mỗi phiên, và lại sau `/clear` hoặc compact) và `UserPromptSubmit` (ghi chú khoảng 50 token mỗi lượt). Nếu phiên bắt đầu trước khi cài, lượt đầu tiên sẽ nạp lõi qua hook prompt.
+- Kích hoạt không cần gọi tên: plugin có hook `SessionStart` (nạp lõi một lần mỗi phiên, và lại sau `/clear` hoặc compact) và `UserPromptSubmit` (ghi chú khoảng 90 token mỗi lượt, thêm một câu gợi ý khi prompt có dấu hiệu phức tạp). Nếu phiên bắt đầu trước khi cài, lượt đầu tiên sẽ nạp lõi qua hook prompt.
 - Xác nhận đã nạp:
   - `claude plugin list` phải có `lyra-4d@lyra-4d-local`.
   - Trong phiên, `/hooks` liệt kê ba hook của Lyra.
-  - Gõ `lyra diag` để nhận dòng chẩn đoán kèm `host-evidence`. `python3 installer/lyra4d.py diag` cho biết số lượt hook đã chạy và skill nào host đã thực sự gọi (qua `PostToolUse:Skill`).
+  - Gõ `lyra diag` để nhận dòng chẩn đoán kèm `host-evidence`. `python3 installer/lyra4d.py diag` cho biết số lượt hook đã chạy và skill nào host đã thực sự gọi, server MCP nào đã được dùng (qua `PostToolUse`), và bao nhiêu lượt có gợi ý phức tạp.
 - Kiểm tra skill khả dụng: `claude plugin details mattpocock-skills@lyra-4d-local` (hoặc `superpowers@…`), hoặc `/skills` trong phiên.
 - Tắt: `claude plugin disable lyra-4d@lyra-4d-local`. Gỡ: `python3 installer/lyra4d.py uninstall --hosts claude`.
 - Đã cài `superpowers` hoặc `mattpocock-skills` từ marketplace chính thức: bộ cài sẽ cảnh báo vì skill sẽ bị nạp hai lần. Tắt bản cũ bằng `claude plugin disable <id>`.

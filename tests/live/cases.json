@@ -20,6 +20,8 @@
     {"id": "7-approved-spec-plan", "fixture": "approved-spec", "turns": [
       "Spec trong docs/specs đã được duyệt. Hãy lập kế hoạch triển khai phần mềm cho nó."]},
     {"id": "8-project-rules-missing-skill", "fixture": "project-rules", "disable_skill": "brainstorming", "turns": [
-      "Brainstorm giúp tôi 3 phương án tên cho chương trình học hè năm nay. lyra diag"]}
+      "Brainstorm giúp tôi 3 phương án tên cho chương trình học hè năm nay. lyra diag"]},
+    {"id": "9-ba-consulting", "fixture": "empty", "expect": "Lyra · DETAIL, no finished framework", "turns": [
+      "Tôi cần tư vấn về cách thức xây dựng bộ máy vận hành đội ngũ BA 1 cách hoàn chỉnh sử dụng công cụ AI để hỗ trợ trong việc kiểm soát đầu ra của tài liệu cung cấp cho Dev. lyra diag"]}
   ]
 }

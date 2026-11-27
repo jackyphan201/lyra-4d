@@ -75,6 +75,12 @@ Effects other than `none` need the user's confirmation before you invoke the ski
 - `scaffold-exercises` (mattpocock, model; effects: files): Frozen misc: scaffold course exercise folders.
 - `setup-pre-commit` (mattpocock, model; effects: files, installs): Frozen misc: Husky + lint-staged pre-commit hooks.
 
+## Host-provided kits (not pinned by Lyra)
+
+- Some sessions list skills and MCP tools from other plugins (domain or company kits). Lyra does not pin or install them; the session's own list is the truth.
+- Same gate as any skill: read-only tools may gather context while diagnosing; name the kit's skills in the DETAIL workflow, its own intake or workflow skill first; invoke them after confirmation.
+- Private kit names go in ~/.lyra-4d/host-kits.json; the installer adds them to the installed copies of this map only.
+
 ## Overlaps
 - Interview: grilling stress-tests a plan the user already has; brainstorming discovers what to build. Pick one per need.
 - TDD: test-driven-development in the superpowers flow, tdd in Matt's flow. One per task.

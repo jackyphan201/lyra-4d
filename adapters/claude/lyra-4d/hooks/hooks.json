@@ -1,5 +1,5 @@
 {
-  "description": "Lyra 4-D: core once per session, a short intake note every turn, a log line when a skill runs.",
+  "description": "Lyra 4-D: core once per session, a short intake note every turn, a log line when a skill or MCP tool runs.",
   "hooks": {
     "SessionStart": [
       {
@@ -26,7 +26,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Skill",
+        "matcher": "^Skill$|^mcp__",
         "hooks": [
           {
             "type": "command",

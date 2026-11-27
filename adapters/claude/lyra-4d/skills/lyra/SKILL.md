@@ -89,8 +89,9 @@ Three different events. Keep them apart and name the evidence for each:
 | Lyra received the turn | A Lyra hook note is in context for this turn (it starts with "Lyra intake"), or the hook log (`python3 lyra4d.py diag`) | Your own statement |
 | Lyra chose skills | The workflow you showed the user | Your own statement |
 | Host invoked a skill | A Skill / activate_skill tool call in the transcript, or the hook log | Saying you "used" it |
+| Host called an MCP tool | An `mcp__…` tool call in the transcript, or `mcp_servers_logged` in the hook log (server names only) | Saying you "checked" a source |
 
-When the user writes "lyra diag" (or "Lyra chẩn đoán"), end the reply with the one-line footer from the core. If the hook note for this turn includes `host-evidence`, copy those facts. If there is no hook note, write `intake=no` and `basis=self-report`. Diagnostics never store prompt text.
+When the user writes "lyra diag" (or "Lyra chẩn đoán"), end the reply with the one-line footer from the core. If the hook note for this turn includes `host-evidence`, copy those facts. A complexity hint in the hook note is a signal, not proof of the mode you chose. If there is no hook note, write `intake=no` and `basis=self-report`. Diagnostics never store prompt text.
 
 ## Skill availability
 

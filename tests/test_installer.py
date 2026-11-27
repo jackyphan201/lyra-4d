@@ -43,6 +43,21 @@ class InstallerTests(unittest.TestCase):
         gm = (h / ".gemini" / "GEMINI.md").read_text()
         self.assertEqual(gm.count("lyra-4d:begin"), 1)
 
+    def test_local_host_kits_reach_installed_copies_only(self):
+        lh = self.e.home / ".lyra-4d"
+        lh.mkdir(parents=True, exist_ok=True)
+        (lh / "host-kits.json").write_text(json.dumps({"kits": [{
+            "name": "acme-kit", "entry": "acme-workflow", "mcp_prefix": "mcp__plugin_acme-kit_",
+            "skills": [{"name": "acme-review", "hint": "Cross-check a spec.", "effects": ["none"]}]}]}))
+        self.e.install()
+        for p in (self.e.home / ".agents/skills/lyra/SKILL-MAP.md",
+                  lh / "claude-marketplace/plugins/lyra-4d/skills/lyra/SKILL-MAP.md"):
+            text = p.read_text()
+            self.assertIn("### acme-kit (start with `acme-workflow`)", text)
+            self.assertIn("`acme-review` (effects: none): Cross-check a spec.", text)
+            self.assertLess(text.index("acme-kit"), text.index("## Overlaps"))
+        self.assertNotIn("acme-kit", (ROOT / "skills/lyra/SKILL-MAP.md").read_text())
+
     def test_exposure_policy(self):
         self.e.install()
         sk = self.e.home / ".agents" / "skills"
@@ -168,6 +183,31 @@ class BuildTests(unittest.TestCase):
         hj = json.loads((ROOT / "adapters/claude/lyra-4d/hooks/hooks.json").read_text())
         self.assertIn("hooks", hj)
         self.assertEqual(set(hj["hooks"]), {"SessionStart", "UserPromptSubmit", "PostToolUse"})
+        self.assertEqual(hj["hooks"]["PostToolUse"][0]["matcher"], "^Skill$|^mcp__")
+
+    def test_skill_map_has_host_kits_section_without_private_kits(self):
+        sm = (ROOT / "skills/lyra/SKILL-MAP.md").read_text()
+        self.assertIn("## Host-provided kits (not pinned by Lyra)", sm)
+        self.assertLess(sm.index("## Host-provided kits"), sm.index("## Overlaps"))
+        cat = json.loads((ROOT / "catalog/catalog.json").read_text())
+        self.assertEqual(cat["host_kits"]["kits"], [])  # private kit names stay out of the public repo
+
+    def test_host_kit_name_colliding_with_locked_skill_is_refused(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        import importlib
+        build = importlib.import_module("build")
+        orig = build.json.loads
+        def fake(text, *a, **k):
+            d = orig(text, *a, **k)
+            if isinstance(d, dict) and "groups" in d and "host_kits" in d:
+                d["host_kits"]["kits"] = [{"name": "x", "skills": [{"name": "grilling", "hint": "h", "effects": ["none"]}]}]
+            return d
+        build.json.loads = fake
+        try:
+            with self.assertRaises(SystemExit):
+                build.skill_map()
+        finally:
+            build.json.loads = orig
 
 
 if __name__ == "__main__":

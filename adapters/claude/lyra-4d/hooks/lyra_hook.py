@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Lyra 4-D hook: gives the model the Lyra intake note on every user turn.
 
-Hosts: claude (SessionStart, UserPromptSubmit, PostToolUse:Skill),
+Hosts: claude (SessionStart, UserPromptSubmit, PostToolUse on Skill and MCP tools),
        codex (UserPromptSubmit), gemini (BeforeAgent, AfterTool:activate_skill).
 Prints only the host's JSON on stdout; never blocks a turn; exits 0 on any error.
-Logs counts only (no prompt text) to ~/.lyra-4d/metrics.jsonl unless metrics are off.
+Logs counts only (no prompt text, no tool input or output) to ~/.lyra-4d/metrics.jsonl unless metrics are off.
 """
 import argparse
 import datetime
@@ -17,6 +17,15 @@ import time
 from pathlib import Path
 
 DIAG_RE = re.compile(r"\blyra\s*(diag|diagnostics?|chẩn\s*đoán|chan\s*doan|debug)\b", re.I)
+# Prompts that usually ask for a system, process, team or end-to-end result. Matched in memory only; never logged.
+COMPLEX_RE = re.compile(
+    r"(xây\s*dựng|thiết\s*kế|quy\s*trình|hệ\s*thống|vận\s*hành|bộ\s*máy|toàn\s*bộ|hoàn\s*chỉnh|tư\s*vấn|lộ\s*trình|chiến\s*lược"
+    r"|\bend[\s-]*to[\s-]*end\b|\boperating\s+model\b|\broadmap\b|\bstrategy\b"
+    r"|\bfrom\s+scratch\b|\bcomplete\s+(system|process|plan|setup)\b)",
+    re.I,
+)
+COMPLEX_HINT = ("This prompt matches Lyra complexity signals. Unless a workflow is already approved in this conversation "
+                "or the request is clearly simple, the reply is the `Lyra · DETAIL` message, not finished work.")
 EVENT_NAMES = {
     ("claude", "session-start"): "SessionStart",
     ("claude", "prompt"): "UserPromptSubmit",
@@ -62,7 +71,7 @@ class Registry:
         try:
             self.data = json.loads(self.path.read_text())
         except Exception:
-            self.data = {"turns": 0, "core": False, "skills": []}
+            self.data = {"turns": 0, "core": False, "skills": [], "mcp": {}}
 
     def save(self):
         try:
@@ -117,6 +126,15 @@ def skill_from_tool(host: str, data: dict):
     return None
 
 
+def mcp_from_tool(host: str, data: dict):
+    """Server part of an MCP tool name (mcp__<server>__<tool>); only the name is read, never input or output."""
+    tool = str(data.get("tool_name") or "")
+    if host != "claude" or not tool.startswith("mcp__"):
+        return None
+    parts = tool.split("__")
+    return parts[1] if len(parts) >= 3 and parts[1] else None
+
+
 def run(host: str, event: str, data: dict) -> str:
     home = lyra_home()
     silent = "{}" if host == "gemini" else ""
@@ -134,6 +152,14 @@ def run(host: str, event: str, data: dict) -> str:
             reg.data.setdefault("skills", []).append(str(skill))
             reg.save()
             row["skill"] = str(skill)
+            log_metric(row)
+            return silent
+        server = mcp_from_tool(host, data)
+        if server:
+            counts = reg.data.setdefault("mcp", {})
+            counts[server] = int(counts.get(server, 0)) + 1
+            reg.save()
+            row["mcp"] = server
             log_metric(row)
         return silent
 
@@ -161,16 +187,21 @@ def run(host: str, event: str, data: dict) -> str:
         reg.data["core"] = True
         fallback = True
     prompt = str(data.get("prompt") or "")
+    complex_hint = bool(COMPLEX_RE.search(prompt))
+    if complex_hint:
+        parts.append(COMPLEX_HINT)
     if DIAG_RE.search(prompt):
         skills = reg.data.get("skills", [])
         source = "hook" if host == "claude" else ("AGENTS.md" if host == "codex" else "GEMINI.md")
         parts.append(
             f"host-evidence: host={host} hook={EVENT_NAMES[(host, 'prompt')]} turn={reg.data['turns']} "
-            f"core_source={source} skills_invoked_logged={skills or 'none'}"
+            f"core_source={source} skills_invoked_logged={skills or 'none'} "
+            f"mcp_servers_logged={reg.data.get('mcp') or 'none'}"
         )
     reg.save()
     text = "\n\n".join(parts)
-    row.update({"turn": reg.data["turns"], "injected_chars": len(text), "core_fallback": fallback})
+    row.update({"turn": reg.data["turns"], "injected_chars": len(text), "core_fallback": fallback,
+                "complex_hint": complex_hint})
     log_metric(row)
     return context_output(host, event, text)
 
