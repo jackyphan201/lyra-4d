@@ -1,6 +1,6 @@
 {
   "name": "lyra-4d",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lyra 4-D intake layer: decides between answering, one clarifying question, or a confirmed workflow before any skill runs.",
   "author": {
     "name": "Lyra 4-D contributors"

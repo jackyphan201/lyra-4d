@@ -77,5 +77,14 @@
     "Debugging: systematic-debugging for any bug; diagnosing-bugs when a bug resists and needs a feedback loop.",
     "Review: code-review reviews a branch against standards and spec; requesting-code-review asks for a review of your own finished work.",
     "Plans: writing-plans writes a plan file; to-spec and to-tickets publish to an issue tracker (user-only)."
-  ]
+  ],
+  "host_kits": {
+    "_doc": "Skill kits other plugins provide (not in upstream.lock.json). Keep kits empty in the public repo; put private kits in ~/.lyra-4d/host-kits.json as {\"kits\": [{\"name\", \"entry\", \"mcp_prefix\", \"skills\": [{\"name\", \"hint\", \"effects\"}]}]}.",
+    "guidance": [
+      "Some sessions list skills and MCP tools from other plugins (domain or company kits). Lyra does not pin or install them; the session's own list is the truth.",
+      "Same gate as any skill: read-only tools may gather context while diagnosing; name the kit's skills in the DETAIL workflow, its own intake or workflow skill first; invoke them after confirmation.",
+      "Private kit names go in ~/.lyra-4d/host-kits.json; the installer adds them to the installed copies of this map only."
+    ],
+    "kits": []
+  }
 }

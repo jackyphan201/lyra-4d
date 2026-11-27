@@ -86,6 +86,39 @@ class HookTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0)
         self.assertIn("Lyra intake", r.stdout)
 
+    def test_mcp_calls_logged_by_server_only(self):
+        secret = "MCP-INPUT-THAT-MUST-NOT-BE-LOGGED"
+        self.e.hook("claude", "session-start", {"session_id": "p1"})
+        self.e.hook("claude", "post-tool", {"session_id": "p1", "tool_name": "mcp__plugin_acme-kit_docs__search",
+                                            "tool_input": {"q": secret}, "tool_response": {"text": secret}})
+        self.e.hook("claude", "post-tool", {"session_id": "p1", "tool_name": "ListSkills", "tool_input": {}})
+        lh = self.e.home / ".lyra-4d"
+        self.assertNotIn(secret, (lh / "metrics.jsonl").read_text())
+        self.assertNotIn(secret, "".join(f.read_text() for f in (lh / "sessions").glob("*.json")))
+        rows = [json.loads(l) for l in (lh / "metrics.jsonl").read_text().splitlines()]
+        self.assertEqual([r.get("mcp") for r in rows if r["event"] == "post-tool"], ["plugin_acme-kit_docs"])
+        o = self.ctx(self.e.hook("claude", "prompt", {"session_id": "p1", "prompt": "lyra diag"}))
+        self.assertIn("mcp_servers_logged={'plugin_acme-kit_docs': 1}", o["additionalContext"])
+
+    def test_complexity_hint_without_logging_prompt(self):
+        prompt = "Tôi cần tư vấn xây dựng bộ máy vận hành đội BA hoàn chỉnh"
+        o = self.ctx(self.e.hook("claude", "prompt", {"session_id": "h1", "prompt": prompt}))
+        self.assertIn("Lyra · DETAIL", o["additionalContext"])
+        self.assertIn("complexity signals", o["additionalContext"])
+        o = self.ctx(self.e.hook("claude", "prompt", {"session_id": "h1", "prompt": "Dịch câu này sang tiếng Anh"}))
+        self.assertEqual(o["additionalContext"], TICK)
+        log = (self.e.home / ".lyra-4d" / "metrics.jsonl").read_text()
+        self.assertNotIn("bộ máy", log)
+        rows = [json.loads(l) for l in log.splitlines() if '"prompt"' in l]
+        self.assertEqual([r["complex_hint"] for r in rows], [True, False])
+
+    def test_core_and_tick_carry_the_detail_gate(self):
+        self.assertTrue(TICK.startswith("Lyra intake"))
+        self.assertIn("Lyra · DETAIL", CORE)
+        self.assertIn("Lyra · DETAIL", TICK)
+        self.assertIn("Complex:", CORE)
+        self.assertLessEqual(len(CORE), 4800)
+
     def test_context_fits_host_limits(self):
         # Claude caps additionalContext at 10,000 chars; Codex previews above ~2,500 tokens.
         self.assertLess(len(CORE) + len(TICK) + 200, 10000)

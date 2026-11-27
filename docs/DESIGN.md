@@ -10,7 +10,7 @@
 | Nguồn (sửa ở đây) | Sinh ra (bằng `tools/build.py`) |
 |---|---|
 | `core/LYRA-CORE.md`: quy tắc 4-D, bảng quyết định, định tuyến, ràng buộc | Lõi trong plugin Claude, khối AGENTS.md/GEMINI.md, `project/LYRA-PROJECT.md`, bản sao trong `skills/lyra/` |
-| `core/LYRA-TICK.md`: ghi chú mỗi lượt (khoảng 50 token) | Plugin Claude, runtime hook |
+| `core/LYRA-TICK.md`: ghi chú mỗi lượt (khoảng 90 token) | Plugin Claude, runtime hook |
 | `skills/lyra/SKILL.md`, `EXAMPLES.md`: phần đọc khi cần (tối ưu prompt, chẩn đoán, ví dụ) | Plugin Claude, `~/.agents/skills/lyra`, `lyra.zip` |
 | `catalog/catalog.json`: gợi ý định tuyến và tác dụng phụ của 53 skill | `skills/lyra/SKILL-MAP.md` (build dừng nếu thiếu skill có trong lock) |
 
@@ -18,8 +18,8 @@
 
 ## Ngân sách token
 
-- **Mỗi phiên:** lõi 4.031 ký tự. Lõi được nạp một lần: qua hook `SessionStart` (Claude), AGENTS.md (Codex) hoặc GEMINI.md (Gemini). Phép đo A/B thực tế cho lượt đầu tiên: Claude Code **+1.600** token input (gồm lõi, ghi chú lượt và mô tả skill `lyra`), Codex **+936** (xem [RESULTS](RESULTS.md)).
-- **Mỗi lượt:** ghi chú khoảng 220 ký tự, tức khoảng 50 token. Ghi chú này chạy qua hook `UserPromptSubmit` hoặc `BeforeAgent`. Không có lần gọi model riêng để phân loại, vì model chính tự áp dụng lõi.
+- **Mỗi phiên:** lõi khoảng 4.700 ký tự (0.1.0: 4.045). Lõi được nạp một lần: qua hook `SessionStart` (Claude), AGENTS.md (Codex) hoặc GEMINI.md (Gemini). Phép đo A/B thực tế cho lượt đầu tiên: Claude Code **+1.600** token input (gồm lõi, ghi chú lượt và mô tả skill `lyra`), Codex **+936** (xem [RESULTS](RESULTS.md)).
+- **Mỗi lượt:** ghi chú khoảng 360 ký tự, tức khoảng 90 token. Khi prompt khớp dấu hiệu phức tạp (regex trong hook, chạy trong bộ nhớ, không log nội dung), hook thêm một câu gợi ý DETAIL. Ghi chú này chạy qua hook `UserPromptSubmit` hoặc `BeforeAgent`. Không có lần gọi model riêng để phân loại, vì model chính tự áp dụng lõi.
 - **Khi cần:** `skills/lyra/SKILL.md` khoảng 1.100 token, `SKILL-MAP.md` khoảng 2.000 token. Chỉ nạp khi người dùng muốn một prompt, muốn chẩn đoán, hoặc khi định tuyến khó.
 - Không đưa danh mục skill dài vào mọi prompt. Host đã liệt kê tên và mô tả skill; Lyra chỉ thêm quy tắc chọn.
 
@@ -29,7 +29,7 @@
 |---|---|---|
 | Lyra đã nhận lượt | Hook chạy và ghi log `prompt`, kèm ghi chú "Lyra intake" trong context | `~/.lyra-4d/metrics.jsonl` |
 | Lyra đã chọn skill | Workflow đã hiển thị cho người dùng | Câu trả lời |
-| Host đã thực sự gọi skill | Lời gọi `Skill` (Claude) hoặc `activate_skill` (Gemini) được log qua `PostToolUse`/`AfterTool`. Với Codex: lệnh đọc `SKILL.md` trong transcript | Log hook, transcript |
+| Host đã thực sự gọi skill hoặc tool MCP | Lời gọi `Skill` hoặc `mcp__…` (Claude, matcher `^Skill$|^mcp__`, chỉ log tên server) hoặc `activate_skill` (Gemini) được log qua `PostToolUse`/`AfterTool`. Với Codex: lệnh đọc `SKILL.md` trong transcript | Log hook, transcript |
 
 ## Thứ tự chạy với upstream
 
@@ -42,3 +42,8 @@
 - `upstream.lock.json` lưu commit, tag, ngày commit, license, danh sách skill (kèm cờ user-only), SHA-256 của mọi file và tree digest.
 - Bộ cài tải đúng commit từ codeload, giải nén an toàn (chặn path traversal và link trỏ ra ngoài), so từng file và từ chối nếu thiếu, thừa hoặc lệch.
 - Bản copy cho host được so lại bằng `verify`. Gỡ cài đặt chỉ xoá bản copy còn khớp hash; bản bạn đã sửa được giữ lại.
+
+## 0.1.1: cổng DETAIL
+
+Sự cố 0.1.0: hook chạy đúng nhưng model nhận một yêu cầu tư vấn phức tạp ("xây bộ máy vận hành đội BA…") và trả luôn bản tư vấn hoàn chỉnh. Nguyên nhân: ghi chú hook chỉ mang tính khuyên; mặc định của host "có đủ thông tin thì làm" thắng; lõi chưa định nghĩa "phức tạp" và chưa có loại đầu ra "tư vấn"; mode bị ẩn nên không có điểm kiểm tra. 0.1.1 sửa ở lõi (định nghĩa complex, tư vấn = design, tự kiểm trước khi gửi, dòng `Lyra · DETAIL`), ở ghi chú mỗi lượt và bằng gợi ý theo regex trong hook. Hook `Stop` không dùng làm cổng: nó chạy sau khi câu trả lời đã gửi, chỉ có thể bắt model viết thêm.
+
